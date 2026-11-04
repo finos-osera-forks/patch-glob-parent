@@ -1,6 +1,6 @@
 {
   "name": "glob-parent",
-  "version": "3.1.0",
+  "version": "3.1.1-osera-00001",
   "description": "Strips glob magic from a string to provide the parent directory path",
   "main": "index.js",
   "scripts": {

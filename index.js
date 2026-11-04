@@ -10,7 +10,7 @@ module.exports = function globParent(str) {
 	if (isWin32 && str.indexOf('/') < 0) str = str.split('\\').join('/');
 
 	// special case for strings ending in enclosure containing path separator
-	if (/[\{\[].*[\/]*.*[\}\]]$/.test(str)) str += '/';
+	if (isEnclosure(str)) str += '/';
 
 	// preserves full path in case of trailing path separator
 	str += 'a';
@@ -22,3 +22,12 @@ module.exports = function globParent(str) {
 	// remove escape chars and return result
 	return str.replace(/\\([\*\?\|\[\]\(\)\{\}])/g, '$1');
 };
+
+function isEnclosure(str) {
+	// /[\{\[].*[\}\]]$/ in linear time: `.` stops at these line terminators,
+	// and no path separator is needed.
+	var text = String(str);
+	var line = text.slice(Math.max(text.lastIndexOf('\n'), text.lastIndexOf('\r'),
+		text.lastIndexOf('\u2028'), text.lastIndexOf('\u2029')) + 1);
+	return /[\}\]]$/.test(line) && /[\{\[]/.test(line);
+}

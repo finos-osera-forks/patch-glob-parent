@@ -171,6 +171,50 @@ describe('glob2base test patterns', function() {
   });
 });
 
+describe('CVE-2020-28469', function() {
+  it("should finish in reasonable time for '{' + '/'.repeat(5000)", function(done) {
+    this.timeout(1000);
+    gp('{' + '/'.repeat(5000));
+    done();
+  });
+
+  it("should finish in reasonable time for '{' + '/'.repeat(500000)", function(done) {
+    this.timeout(1000);
+    gp('{' + '/'.repeat(500000));
+    done();
+  });
+
+  it("should finish in reasonable time for '{'.repeat(500000)", function(done) {
+    this.timeout(1000);
+    gp('{'.repeat(500000));
+    done();
+  });
+
+  it('should treat an escaped opener and a closer as an enclosure without a path separator', function() {
+    assert.equal(gp('aa/\\{}'), 'aa/{}');
+    assert.equal(gp('aa/\\{]'), 'aa/{]');
+  });
+
+  it('should not find an enclosure across a line terminator', function() {
+    assert.equal(gp('a/\\{\n}'), 'a');
+    assert.equal(gp('a/\\{\r}'), 'a');
+    assert.equal(gp('a/\\{\u2028}'), 'a');
+    assert.equal(gp('a/\\{\u2029}'), 'a');
+  });
+
+  it('should find an enclosure on the last line', function() {
+    assert.equal(gp('a\n/\\{}'), 'a\n/{}');
+  });
+
+  it('should read what is not a string as a string', function() {
+    if (!isWin32) {
+      assert.equal(gp(undefined), '.');
+      assert.equal(gp(['a/b']), 'a');
+    }
+    assert.equal(gp(Buffer.from('a/b')), 'a');
+  });
+});
+
 if (isWin32) {
   describe('technically invalid windows globs', function() {
     it('should manage simple globs with backslash path separator', function() {

@@ -1,0 +1,22 @@
+# Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 3.1.1-osera-00001
+baseline: v3.1.0+patch.baseline
+fixes:
+  - cve: CVE-2020-28469
+    upstream_fix_url: https://github.com/gulpjs/glob-parent/commit/f9231168b0041fea3f8f954b3cceb56269fc6366
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2020-28469
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-glob-parent/commit/fcde9ba
+    basis: adapted
+    artifacts:
+      - glob-parent
+    note: "New in this release; adapted onto 3.1.0, not a port: upstream's 5.1.2 regex is still slow on repeated '{' and upstream's 6.0.1 check changes results for escaped openers, so a linear check keeps 3.1.0's rule. This removes CVE-2020-28469's enclosure regex only: long crafted inputs stay slow through is-glob 3.1.0 and the dirname loop's own regex, both unchanged from 3.1.0 and neither named by a CVE we found (6.6 s on '{/' repeated 2500 times, 9.3 s on '(\\n' repeated 100000 times). GHSA-ww39-953v-wcq6's range starts at 4.0.0 and NVD's is before 5.1.2; 3.1.0 has the vulnerable regex, measured at 26 s on upstream's 5000-character input."
+tests:
+  commit: d725dbec8b6ebdda275c42414715066454f95392
+  command: npm install --no-package-lock --ignore-scripts --no-audit --no-fund && mkdir -p reports && node_modules/.bin/_mocha --reporter xunit test.js > reports/TEST-glob-parent.xml
+  runtime: Node.js v22.16.0, npm 11.4.2, mocha 2.5.3, macOS 27.2 arm64
+  report: glob-parent-3.1.1-osera-00001-tests.zip
+  report_sha256: f6a1210b62918cf1b94378396200a79c2249ff88f78609720bb4a6816470f835
+  result: pass
+  note: "upstream's mocha suite at the tested commit, upstream's 14 tests and 7 new: 21 tests run, 0 failed, 0 skipped. The regression tests for CVE-2020-28469 are in test.js's describe of that name, three of them upstream's inputs from 5.1.2 and 6.0.1; with the version commit's index.js the '{' + '/'.repeat(5000) test fails after 27 s against its 1000 ms limit and both 500000-character tests were killed at an outer 90 s limit, leaving no report. The other four are guards that keep 3.1.0's results and pass before and after. Compared with 3.1.0's index.js on 4,118,519 generated inputs: 0 differences."
